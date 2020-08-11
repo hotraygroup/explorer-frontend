@@ -51,12 +51,15 @@ const cx = cn.bind(styles);
 export default function({msg, txData}) {
 	const fees = useSelector(state => state.blockchain.fees);
 
-	const {type, value} = msg;
+	//const {type, value} = msg;
+	const value = msg.events;
+	const type = value?.message?.action;
 	const MsgGridRender = React.useMemo(() => {
 		const displaySymbol = () => {
-			if (!value.symbol) return "";
-			const split = value.symbol.split("_");
-			return split[0].split("-")[0] + "_" + split[1].split("-")[0];
+			if (!value?.transfer?.denom) return "";
+			return !value?.transfer?.denom;
+			//
+			//return split[0].split("-")[0] + "_" + split[1].split("-")[0];
 		};
 		return (
 			<div className={cx("grid")}>
@@ -69,21 +72,21 @@ export default function({msg, txData}) {
 									<ul className={cx("To-wrapper")}>
 										<li className={cx("label")}>To</li>
 										<li className={cx("value")}>
-											{_.map(value.outputs, v => (
-												<NavLink key={v.address} className={cx("blueColor")} to={`/account/${refineAddress(v.address)}`}>
-													<DisplayLongString inputString={refineAddress(v.address)} />
-												</NavLink>
-											))}
+											
+											<NavLink  className={cx("blueColor")} to={`/account/${refineAddress(value?.transfer?.recipient)}`}>
+												<DisplayLongString inputString={refineAddress(value?.transfer?.recipient)} />
+											</NavLink>
+											
 										</li>
 									</ul>
 									<ul className={cx("value-wrapper")}>
 										<li className={cx("label")}>Value</li>
 										<li className={cx("value")}>
-											{_.map(value.outputs, v => (
-												<span key={v.address}>
-													{divide(v?.coins?.[0]?.amount, consts.NUM.BASE_MULT)} {v?.coins?.[0]?.denom}
+											
+												<span>
+													{value?.transfer?.amount} {value?.transfer?.denom}
 												</span>
-											))}
+										
 										</li>
 									</ul>
 								</div>
@@ -97,8 +100,8 @@ export default function({msg, txData}) {
 					<>
 						<InfoRow label='Value'>
 							<span className={cx("flexIt")}>
-								<Decimal fontSizeBase={15} value={divide(value?.amount, consts.NUM.BASE_MULT)} />
-								<span className={cx("currency", {BNB: value.symbol === "BNB"})}>{value?.symbol?.split("-")[0]}</span>
+								<Decimal fontSizeBase={15} value={divide(value?.transfer?.amount, consts.NUM.BASE_MULT)} />
+								<span className={cx("currency", {HST: value?.transfer?.denom === "HST"})}>{value?.transfer?.denom?.split("-")[0]}</span>
 							</span>
 						</InfoRow>
 					</>
@@ -125,7 +128,7 @@ export default function({msg, txData}) {
 								) : (
 									<span className={cx("flexIt")}>
 										<Decimal value={`${refineFee(txData?.fee)[1]}`} fontSizeBase={15} />
-										<span className={cx("currency", {BNB: refineFee(txData?.fee)[0].split("-")[0] === "BNB"})}>{refineFee(txData?.fee)[0].split("-")[0]}</span>
+										<span className={cx("currency", {HST: refineFee(txData?.fee)[0].split("-")[0] === "HST"})}>{refineFee(txData?.fee)[0].split("-")[0]}</span>
 									</span>
 								)
 							) : (
@@ -180,7 +183,7 @@ export default function({msg, txData}) {
 						<InfoRow label={"Value"}>
 							<span className={cx("flexIt")}>
 								<Decimal fontSizeBase={15} value={divide(value?.amount?.[0]?.amount, consts.NUM.BASE_MULT)} />
-								<span className={cx("currency", {BNB: value?.amount?.[0]?.denom === "BNB"})}>{value?.amount?.[0]?.denom?.split("-")[0]}</span>
+								<span className={cx("currency", {HST: value?.amount?.[0]?.denom === "HST"})}>{value?.amount?.[0]?.denom?.split("-")[0]}</span>
 							</span>
 						</InfoRow>
 						<InfoRow label={"Description"}>{value?.description}</InfoRow>
@@ -194,13 +197,13 @@ export default function({msg, txData}) {
 						<InfoRow label='fee'>
 							<span className={cx("flexIt")}>
 								<Decimal fontSizeBase={15} value={"1000.000000"} />
-								<span className={cx("currency", "BNB")}>BNB</span>
+								<span className={cx("currency", "HST")}>HST</span>
 							</span>
 						</InfoRow>
 						<InfoRow label={"Initial Price"}>
 							<span className={cx("flexIt")}>
 								<Decimal fontSizeBase={15} value={divide(value?.init_price, consts.NUM.BASE_MULT)} />
-								<span className={cx("currency", "BNB")}>BNB</span>
+								<span className={cx("currency", "HST")}>HST</span>
 							</span>
 						</InfoRow>
 						<InfoRow label={"Symbol"}>
@@ -210,7 +213,7 @@ export default function({msg, txData}) {
 				) : (
 					undefined
 				)}
-				{type === txTypes.COSMOS.PROPOSAL_SUBMIT ? <TxSubmitProposal txData={txData} value={value} /> : undefined}
+				{type === txTypes.HSCHAIN.PROPOSAL_SUBMIT ? <TxSubmitProposal txData={txData} value={value} /> : undefined}
 				{txData.origTxhash && txTypes.DEX.ORDER_CANCEL === type ? (
 					<InfoRow label='Order Tx'>
 						<NavLink className={cx("blueColor")} to={`/txs/${txData.origTxhash}`}>
@@ -225,7 +228,7 @@ export default function({msg, txData}) {
 						<InfoRow label={"Value"}>
 							<span className={cx("flexIt")}>
 								<Decimal fontSizeBase={15} value={divide(value?.amount?.[0]?.amount, consts.NUM.BASE_MULT)} />
-								<span className={cx("currency", {BNB: value?.amount?.[0]?.denom === "BNB"})}>{value?.amount?.[0]?.denom?.split("-")[0]}</span>
+								<span className={cx("currency", {HST: value?.amount?.[0]?.denom === "HST"})}>{value?.amount?.[0]?.denom?.split("-")[0]}</span>
 							</span>
 						</InfoRow>
 						<InfoRow label={"To"}>
@@ -234,8 +237,8 @@ export default function({msg, txData}) {
 							</NavLink>
 						</InfoRow>
 						<InfoRow label={"From"}>
-							<NavLink className={cx("blueColor")} to={`/account/${value?.from}`}>
-								<DisplayLongString inputString={value?.from} />
+							<NavLink className={cx("blueColor")} to={`/account/${value?.message?.sender}`}>
+								<DisplayLongString inputString={value?.message?.sender} />
 							</NavLink>
 						</InfoRow>
 						<InfoRow label={"Timestamp"}>
@@ -253,7 +256,8 @@ export default function({msg, txData}) {
 					</>
 				) : (
 					<InfoRow label='From'>
-						<TxGetFrom txData={txData} type={type} value={value} cx={cx} />
+						{/*<TxGetFrom txData={txData} type={type} value={value?.message?.sender} cx={cx} />*/}
+						<span>{value?.message?.sender === "" ? "--" : value?.message?.sender}</span>
 					</InfoRow>
 				)}
 				{type === txTypes.TOKENS.HTLT_CLAIM ? (
@@ -283,7 +287,7 @@ export default function({msg, txData}) {
 				) : (
 					undefined
 				)}
-				{type === txTypes.COSMOS.VOTE ? (
+				{type === txTypes.HSCHAIN.VOTE ? (
 					<>
 						<InfoRow label={"proposal ID"}>{value?.proposal_id}</InfoRow>
 						<InfoRow label={"option"}>{value?.option}</InfoRow>
@@ -305,7 +309,7 @@ export default function({msg, txData}) {
 				placement='right-start'
 				TransitionComponent={Fade}
 				TransitionProps={{timeout: 300}}
-				title={`Tx Fee: ${feeValue}${feeValue !== "none" ? ` BNB` : ""}`}
+				title={`Tx Fee: ${feeValue}${feeValue !== "none" ? ` HST` : ""}`}
 				disableTouchListener
 				disableFocusListener>
 				<img className={cx("txType-img")} src={getTxTypeIcon(type)} alt={"icon"} />
@@ -352,8 +356,8 @@ const TxSubmitProposal = ({txData, value}) => {
 				<InfoRow label='Initial Deposit'>
 					<span className={cx("flexIt")}>
 						<Decimal fontSizeBase={15} value={divide(value?.initial_deposit?.[0].amount, consts.NUM.BASE_MULT)} />
-						{/*{"Always BNB anyway"}*/}
-						<span className={cx("BNB")}>BNB</span>
+						{/*{"Always HST anyway"}*/}
+						<span className={cx("HST")}>HST</span>
 					</span>
 				</InfoRow>
 				<InfoRow label='Expire Time'>{getTotalTime(description.expire_time)}</InfoRow>
@@ -406,7 +410,7 @@ const TradeBox = ({symbol, value}) => {
 	const [image, setLinkArr] = useGetImage([], symbolNone);
 	useEffect(() => {
 		if (!empty(assets) && !_.isNil(symbol) && image === symbolNone) {
-			if (symbol === "BNB") setLinkArr([bnbSVG]);
+			if (symbol === "HST") setLinkArr([bnbSVG]);
 			else setLinkArr([consts.GET_LOGO_LINK(symbol), _.filter(assets, v => v.asset === symbol)?.[0]?.assetImg]);
 		}
 	}, [assets, image, setLinkArr, symbol, value]);

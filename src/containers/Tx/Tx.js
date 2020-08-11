@@ -26,17 +26,11 @@ export default function(props) {
 	React.useEffect(() => {
 		//  data is from order id
 		console.log(state.data, txData);
-		if (!_.isNil(state.data?.fee) && txData?.fee !== state.data?.fee) {
-			console.log("set orderId data");
-			const obj = {fee: state.data.fee, status: state.data.status};
-			if (state.data.status === "Canceled") _.assign(obj, {origTxhash: state.data.transactionHash});
-			setTxData(v => ({...v, ...obj}));
-			if (_.isNil(txData?.messages)) setUrl(`${consts.API_BASE}${consts.API.TX}/${state.data.transactionHash}`);
-		}
-		//  data is from txHash
-		else if (!empty(state.data?.messages) && txData.tx_hash !== state.data.tx_hash) {
+
+		
+	 if (!empty(state.data?.data?.messages) && txData?.tx_hash !== state.data.data.tx_hash) {
 			console.log("set txData");
-			setTxData(v => ({...v, ...state.data}));
+			setTxData(v => ({...v, ...state.data.data}));
 			//  data has order id
 			// if (_.isNil(txData?.fee))
 
@@ -55,7 +49,7 @@ export default function(props) {
 			setUrl(`${consts.API_BASE}${isOrderId ? consts.API.ORDERS : consts.API.TX}/${txHash}`);
 		}
 	}, [txHash, prevTxHash, setUrl, isOrderId]);
-	if (state.data?.height === 0 || (!empty(txData) && _.isNil(state.data?.orderId) && _.isNil(state.data?.tx_hash))) {
+	if (state.data?.data?.height === 0 || (!empty(txData) && _.isNil(state.data?.data?.tx_hash))) {
 		return <NotFound altText={"Sorry! Tx Not Found"} />;
 	}
 

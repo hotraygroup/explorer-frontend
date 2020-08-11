@@ -23,8 +23,8 @@ export default function({txData}) {
 				</InfoRow>
 				<InfoRow label='Status'>
 					<span>
-						<img className={cx("status-img")} src={txData?.result ? successSVG : failSVG} alt={"status"} />
-						{txData?.result ? "Success" : "fail"}
+						<img className={cx("status-img")} src={txData?.code === 0 ? successSVG : failSVG} alt={"status"} />
+						{txData?.code === 0 ? "Success" : "fail"}
 					</span>
 				</InfoRow>
 				<InfoRow label='Height'>
